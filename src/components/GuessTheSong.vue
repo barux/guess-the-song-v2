@@ -109,7 +109,6 @@ async function playSnippet() {
 		progressMs.value = 0
 		await el.play()
 		const ms = currentSnippetSeconds.value * 1000
-		const start = performance.now()
 		const tick = () => {
 			const current = Math.min(el.currentTime * 1000, ms)
 			progressMs.value = current
@@ -227,38 +226,6 @@ onUnmounted(() => {
 		tom = null
 	}
 })
-
-async function load2020Mp3Songs() {
-	feedback.value = 'Loading 2020 tracks...'
-	try {
-		const queries = [
-			'year:2020',
-			'year:2020 hit',
-			'year:2020 top',
-			'year:2020 billboard',
-		]
-		const resultsArrays = await Promise.all(queries.map(q => searchDeezerTracksPaged(q, 4, 25, 'RANKING')))
-		const seen = new Set<string>()
-		const merged: Song[] = []
-		for (const arr of resultsArrays) {
-			for (const t of arr) {
-				if (!t.preview) continue
-				const path = getPathname(t.preview)
-				if (!path.endsWith('.mp3')) continue
-				const key = `${t.title}|${t.artist?.name}|${t.preview}`
-				if (seen.has(key)) continue
-				seen.add(key)
-				const cover = (t as any).album?.cover_medium || (t as any).album?.cover || undefined
-				merged.push({ title: t.title, artist: t.artist?.name, url: t.preview, cover })
-			}
-		}
-		songs.value = merged
-		resetGame()
-		feedback.value = `Loaded ${merged.length} tracks`
-	} catch (e) {
-		feedback.value = 'Failed to load 2020 tracks'
-	}
-}
 
 async function loadArtistMp3Songs(artistName: string, pages = 8) {
     feedback.value = `Loading ${artistName} tracks...`
